@@ -1,0 +1,473 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+
+    <link id="pygments-light-theme" rel="stylesheet" type="text/css"
+          href="/theme/pygments/github.min.css">
+
+
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+
+
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+
+  
+
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#00e5ff">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#00e5ff">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Microsoft EDGE -->
+    <meta name="msapplication-TileColor" content="#00e5ff">
+
+<meta name="author" content="Suibin Sun" />
+<meta name="description" content="(转载自：https://zh.wikipedia.org/wiki/KMP%E7%AE%97%E6%B3%95) 在本文中，我们将使用始于零的数组来表示字符串。比如，若字符串S = &#34;ABC&#34;，则S[2]表示字符&#39;C&#39;。这种表示方法与C语言一致。 在计算机科学中，Knuth-Morris-Pratt字符串查找算法（简称为KMP算法）可在一个主文本字符串S内查找一个词W的出现位置。此算法通过运用对这个词在不匹配时本身就包含足够的信息来确定下一个匹配将在哪里开始的发现，从而避免重新检查先前匹配的字符。 这个算法是由高德纳和沃恩·普拉特（英语：Vaughan Pratt）在1974年构思，同年詹姆斯·H·莫里斯（英语：James H. Morris）也独立地设计出该算法，最终由三人于1977年联合发表。 算法说明 查找算法实例 让我们用一个实例来演示这个算法。在任意给定时间 …" />
+<meta name="keywords" content="kmp, string, search, match, substring">
+
+
+<meta property="og:site_name" content="Suibin Sun's Blog"/>
+<meta property="og:title" content="KMP算法"/>
+<meta property="og:description" content="(转载自：https://zh.wikipedia.org/wiki/KMP%E7%AE%97%E6%B3%95) 在本文中，我们将使用始于零的数组来表示字符串。比如，若字符串S = &#34;ABC&#34;，则S[2]表示字符&#39;C&#39;。这种表示方法与C语言一致。 在计算机科学中，Knuth-Morris-Pratt字符串查找算法（简称为KMP算法）可在一个主文本字符串S内查找一个词W的出现位置。此算法通过运用对这个词在不匹配时本身就包含足够的信息来确定下一个匹配将在哪里开始的发现，从而避免重新检查先前匹配的字符。 这个算法是由高德纳和沃恩·普拉特（英语：Vaughan Pratt）在1974年构思，同年詹姆斯·H·莫里斯（英语：James H. Morris）也独立地设计出该算法，最终由三人于1977年联合发表。 算法说明 查找算法实例 让我们用一个实例来演示这个算法。在任意给定时间 …"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/kmp-algorithm.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2021-01-26 20:26:00+08:00"/>
+<meta property="article:modified_time" content="2021-01-26 20:26:00+08:00"/>
+<meta property="article:author" content="/author/suibin-sun.html">
+<meta property="article:section" content="Algorithm"/>
+<meta property="article:tag" content="kmp"/>
+<meta property="article:tag" content="string"/>
+<meta property="article:tag" content="search"/>
+<meta property="article:tag" content="match"/>
+<meta property="article:tag" content="substring"/>
+<meta property="og:image" content="/images/profile.png">
+
+  <title>Suibin Sun's Blog &ndash; KMP算法</title>
+
+</head>
+<body class="light-theme">
+  <aside>
+    <div>
+      <a href="">
+        <img src="/images/profile.png" alt="Suibin Sun" title="Suibin Sun">
+      </a>
+
+      <h1>
+        <a href="">Suibin Sun</a>
+      </h1>
+
+<p>Hello!</p>
+
+      <nav>
+        <ul class="list">
+
+
+
+            <li>
+              <a target="_self" href="https://github.com/sun98" >Github</a>
+            </li>
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Bilibili" href="https://space.bilibili.com/14774330" target="_blank">
+              <i class="fab fa-Bilibili"></i>
+            </a>
+          </li>
+      </ul>
+    </div>
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="">Home</a>
+
+
+
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="kmp-algorithm">KMP算法</h1>
+    <p>
+      Posted on 周二 26 一月 2021 in <a href="/category/algorithm.html">Algorithm</a>
+
+    </p>
+  </header>
+
+
+  <div>
+    <p>(转载自：https://zh.wikipedia.org/wiki/KMP%E7%AE%97%E6%B3%95)</p>
+<p>在本文中，我们将使用始于零的数组来表示字符串。比如，若字符串<code>S = "ABC"</code>，则<code>S[2]</code>表示字符<code>'C'</code>。这种表示方法与C语言一致。</p>
+<p>在计算机科学中，Knuth-Morris-Pratt字符串查找算法（简称为KMP算法）可在一个主文本字符串S内查找一个词W的出现位置。此算法通过运用对这个词在不匹配时本身就包含足够的信息来确定下一个匹配将在哪里开始的发现，从而避免重新检查先前匹配的字符。</p>
+<p>这个算法是由高德纳和沃恩·普拉特（英语：Vaughan Pratt）在1974年构思，同年詹姆斯·H·莫里斯（英语：James H. Morris）也独立地设计出该算法，最终由三人于1977年联合发表。 </p>
+<h1>算法说明</h1>
+<h2>查找算法实例</h2>
+<p>让我们用一个实例来演示这个算法。在任意给定时间，本算法被两个整数 <code>m</code> 和 <code>i</code> 所决定： </p>
+<ul>
+<li><code>m</code> 代表主文字符串 <code>S</code> 内匹配字符串W的当前查找位置，</li>
+<li><code>i</code> 代表匹配字符串 <code>W</code> 当前做比较的字符位置。</li>
+</ul>
+<p>图示如下： </p>
+<div class="highlight"><pre><span></span><code><span class="err">             1         2</span>
+<span class="c">m: 01234567890123456789012</span>
+<span class="c">S: ABC ABCDAB ABCDABCDABDE</span>
+<span class="c">W: ABCDABD</span>
+<span class="c">i: 0123456</span>
+</code></pre></div>
+
+
+<p>我们从 <code>W</code> 与 <code>S</code> 的开头比较起。我们比对到 <code>S[3]</code>(=<code>' '</code>) 时，发现 <code>W[3]</code>(=<code>'D'</code>)与其不符。接着并不是从 <code>S[1]</code> 比较下去。我们已经知道 <code>S[1]</code>~<code>S[3]</code> 不与 <code>W[0]</code> 相合。因此，略过这些字符，令 <code>m = 4</code> 以及 <code>i = 0</code> 。 </p>
+<div class="highlight"><pre><span></span><code><span class="err">             1         2</span>
+<span class="c">m: 01234567890123456789012</span>
+<span class="c">S: ABC ABCDAB ABCDABCDABDE</span>
+<span class="c">W:     ABCDABD</span>
+<span class="c">i:     0123456</span>
+</code></pre></div>
+
+
+<p>如上所示，我们检核了 <code>"ABCDAB"</code> 这个字符串。然而，这与目标仍有些差异。我们可以注意到，<code>"AB"</code> 在字符串头尾处出现了两次。这意味着尾端的 <code>"AB"</code> 可以作为下次比较的起始点。因此，我们令 <code>m = 8</code>, <code>i = 2</code> ，继续比较。图标如下：</p>
+<div class="highlight"><pre><span></span><code><span class="err">             1         2</span>
+<span class="c">m: 01234567890123456789012</span>
+<span class="c">S: ABC ABCDAB ABCDABCDABDE</span>
+<span class="c">W:         ABCDABD</span>
+<span class="c">i:         0123456</span>
+</code></pre></div>
+
+
+<p>于<code>m = 10</code>的地方，又出现不相符的情况。类似地，令 <code>m = 11</code>, <code>i = 0</code> 继续比较： </p>
+<div class="highlight"><pre><span></span><code><span class="err">             1         2</span>
+<span class="c">m: 01234567890123456789012</span>
+<span class="c">S: ABC ABCDAB ABCDABCDABDE</span>
+<span class="c">W:            ABCDABD</span>
+<span class="c">i:            0123456</span>
+</code></pre></div>
+
+
+<p>这时，<code>S[17]</code>(=<code>'C'</code>)不与 <code>W[6]</code> 相同，但是亦出现了两次"AB"，我们采取一贯的作法，令 <code>m = 15</code> 和 <code>i = 2</code> ，继续搜索。 </p>
+<div class="highlight"><pre><span></span><code><span class="err">             1         2</span>
+<span class="c">m: 01234567890123456789012</span>
+<span class="c">S: ABC ABCDAB ABCDABCDABDE</span>
+<span class="c">W:                ABCDABD</span>
+<span class="c">i:                0123456</span>
+</code></pre></div>
+
+
+<p>我们找到完全匹配的字符串了，其起始位置于 <code>S[15]</code> 的地方。 </p>
+<h1>部分匹配表</h1>
+<p><strong>部分匹配表</strong>，又称为<strong>失配函数</strong>，作用是让算法无需多次匹配S中的任何字符。能够实现线性时间搜索的关键是在主串的一些字段中检查模式串的初始字段，我们可以确切地知道在当前位置之前的一个潜在匹配的位置。换句话说，在不错过任何潜在匹配的情况下，我们"预搜索"这个模式串本身并将其译成一个包含所有可能失配的位置对应可以绕过最多无效字符的列表。 </p>
+<p>对于 <code>W</code> 中的任何位置，我们都希望能够查询那个位置前（不包括那个位置）有可能的 <code>W</code> 的最长初始字段的长度，而不是从 <code>W[0]</code> 开始失配的整个字段，这长度就是我们查找下一个匹配时回退的距离。因此 <code>T[i]</code> 是 <code>W</code> 的可能的适当初始字段同时也是结束于 <code>W[i - 1]</code> 的子串的最大长度。我们使空串长度是 <code>0</code> 。当一个失配出现在模式串的最开始，这是特殊情况（无法回退），我们设置 <code>T[0] = -1</code>，在下面讨论。 </p>
+<h2>创建表算法示例</h2>
+<p>我们首先考虑例子 <code>W = "ABCDABD"</code>。使用这个大致相同的模式串作为主搜索，我们将会看到它高效的原因。 </p>
+<p>首先，我们设定<code>T[0] = -1</code>。为了找到<code>T[1]</code>，我们必须找到一个<code>"A"</code>的适当后缀（英语：Substring#Suffix）同时也是<code>W</code>的前缀。但<code>"A"</code>没有后缀，所以我们设定<code>T[1] = 0</code>。类似地，<code>T[2] = 0</code>。 </p>
+<p>继续到<code>T[3]</code>，我们注意到检查<strong>所有</strong>后缀有一个捷径：假设我们发现了一个适当后缀，结束于<code>W[2]</code>、长度为2（最大可能）的后缀，那么它的第一个字符是<code>W</code>的一个适当前缀。因此一个结束于<code>W[1]</code>的适当前缀，我们已经确定了不可能出现在<code>T[2]</code>。因此在每一层递推中，这个规则是只有在上一层找到一个长度为m的有效后缀时，才需要检查给定长度为<code>m+1</code>的后缀（例如，<code>T[x] = m</code>）。 </p>
+<p>那么我们甚至不需要关心具有长度为2的子串，由于上一个情况因长度为1而失配，所以<code>T[3] = 0</code>。 </p>
+<p>我们继续遍历到<code>W[4]</code>子序列，<code>'A'</code>。同样的逻辑说明我们需要考虑的最长子串的长度是1，并且在<code>'A'</code>这个情况中有效，回退到我们寻找的当前字符之前的字段，因此<code>T[4] = 0</code>。 </p>
+<p>现在考虑下一个字符<code>W[5]</code>，<code>'B'</code>，我们使用这样的逻辑：如果我们曾发现一个子模式在上一个字符<code>W[4]</code>之前出现，继续到当前字符<code>W[5]</code>，那么在它之前它本身会拥有一个结束于<code>W[4]</code>合适的初始段，与事实相反的是我们已经找到<code>'A'</code>是最早出现在结束于<code>W[4]</code>的合适字段。因此为了找到<code>W[5]</code>的终止串，我们不需要查看<code>W[4]</code>。因此<code>T[5] = 1</code>。 </p>
+<p>最后，我们看到<code>W[4] = 'A'</code>下一个字符是<code>'B'</code>，并且这也确实是<code>W[5]</code>。此外，上面的相同参数说明为了查找<code>W[6]</code>的字段，我们不需要向前查看<code>W[4]</code>，所以我们得出<code>T[6] = 2</code>。 
+于是我们得到下面的表： </p>
+<table>
+<thead>
+<tr>
+<th align="center">i</th>
+<th align="center">0</th>
+<th align="center">1</th>
+<th align="center">2</th>
+<th align="center">3</th>
+<th align="center">4</th>
+<th align="center">5</th>
+<th align="center">6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>W[i]</code></td>
+<td align="center">A</td>
+<td align="center">B</td>
+<td align="center">C</td>
+<td align="center">D</td>
+<td align="center">A</td>
+<td align="center">B</td>
+<td align="center">D</td>
+</tr>
+<tr>
+<td align="center"><code>T[i]</code></td>
+<td align="center">-1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">2</td>
+</tr>
+</tbody>
+</table>
+<p>另一个更复杂和有趣的例子： </p>
+<table>
+<thead>
+<tr>
+<th align="center">i</th>
+<th align="center">0</th>
+<th align="center">1</th>
+<th align="center">2</th>
+<th align="center">3</th>
+<th align="center">4</th>
+<th align="center">5</th>
+<th align="center">6</th>
+<th align="center">7</th>
+<th align="center">8</th>
+<th align="center">9</th>
+<th align="center">10</th>
+<th align="center">11</th>
+<th align="center">12</th>
+<th align="center">13</th>
+<th align="center">14</th>
+<th align="center">15</th>
+<th align="center">16</th>
+<th align="center">17</th>
+<th align="center">18</th>
+<th align="center">19</th>
+<th align="center">20</th>
+<th align="center">21</th>
+<th align="center">22</th>
+<th align="center">23</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>W[i]</code></td>
+<td align="center">P</td>
+<td align="center">A</td>
+<td align="center">R</td>
+<td align="center">T</td>
+<td align="center">I</td>
+<td align="center">C</td>
+<td align="center">I</td>
+<td align="center">P</td>
+<td align="center">A</td>
+<td align="center">T</td>
+<td align="center">E</td>
+<td align="center"></td>
+<td align="center">I</td>
+<td align="center">N</td>
+<td align="center"></td>
+<td align="center">P</td>
+<td align="center">A</td>
+<td align="center">R</td>
+<td align="center">A</td>
+<td align="center">C</td>
+<td align="center">H</td>
+<td align="center">U</td>
+<td align="center">T</td>
+<td align="center">E</td>
+</tr>
+<tr>
+<td align="center"><code>T[i]</code></td>
+<td align="center">-1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">2</td>
+<td align="center">3</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<h2>创建表算法的伪代码的解释</h2>
+<p>上面的例子以最少的复杂步骤展示了组织这个表格的一般性方法。这么做的原理是对整体的搜索：大多数工作已经在检测到当前位置的时候做完了，剩下需要做的很少。略微复杂的一点是找到一个共同前后缀。这就需要有一些初始化的代码。 </p>
+<div class="highlight"><pre><span></span><code><span class="n">algorithm</span><span class="w"> </span><span class="nl">kmp_table</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">input</span><span class="err">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">an</span><span class="w"> </span><span class="k">array</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">characters</span><span class="p">,</span><span class="w"> </span><span class="n">W</span><span class="w"> </span><span class="p">(</span><span class="n">the</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">analyzed</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">an</span><span class="w"> </span><span class="k">array</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">integers</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">(</span><span class="n">the</span><span class="w"> </span><span class="nc">table</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">filled</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">output</span><span class="err">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">nothing</span><span class="w"> </span><span class="p">(</span><span class="n">but</span><span class="w"> </span><span class="n">during</span><span class="w"> </span><span class="k">operation</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">populates</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="nc">table</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">define</span><span class="w"> </span><span class="nl">variables</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">an</span><span class="w"> </span><span class="k">integer</span><span class="p">,</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">(</span><span class="n">the</span><span class="w"> </span><span class="k">current</span><span class="w"> </span><span class="k">position</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="k">are</span><span class="w"> </span><span class="n">computing</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">T</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">an</span><span class="w"> </span><span class="k">integer</span><span class="p">,</span><span class="w"> </span><span class="n">cnd</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">(</span><span class="n">the</span><span class="w"> </span><span class="n">zero</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">W</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">next</span><span class="w"> </span>
+<span class="k">character</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">current</span><span class="w"> </span><span class="n">candidate</span><span class="w"> </span><span class="nf">substring</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">(</span><span class="n">the</span><span class="w"> </span><span class="k">first</span><span class="w"> </span><span class="n">few</span><span class="w"> </span><span class="k">values</span><span class="w"> </span><span class="k">are</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="n">different</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">what</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">algorithm</span><span class="w"> </span>
+<span class="n">might</span><span class="w"> </span><span class="n">suggest</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">let</span><span class="w"> </span><span class="n">T</span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">[</span><span class="n">1</span><span class="o">]</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">W</span><span class="p">)</span><span class="w"> </span><span class="n">do</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="k">first</span><span class="w"> </span><span class="k">case</span><span class="err">:</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="nf">substring</span><span class="w"> </span><span class="n">continues</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">W</span><span class="o">[</span><span class="n">pos - 1</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">W</span><span class="o">[</span><span class="n">cnd</span><span class="o">]</span><span class="w"> </span><span class="k">then</span><span class="w"></span>
+<span class="w">            </span><span class="n">let</span><span class="w"> </span><span class="n">cnd</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="n">cnd</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">[</span><span class="n">pos</span><span class="o">]</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="n">cnd</span><span class="p">,</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">(</span><span class="k">second</span><span class="w"> </span><span class="k">case</span><span class="err">:</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">doesn</span><span class="err">&#39;</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">fall</span><span class="w"> </span><span class="n">back</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">cnd</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">then</span><span class="w"></span>
+<span class="w">            </span><span class="n">let</span><span class="w"> </span><span class="n">cnd</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="n">T</span><span class="o">[</span><span class="n">cnd</span><span class="o">]</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">(</span><span class="n">third</span><span class="w"> </span><span class="k">case</span><span class="err">:</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">candidates</span><span class="p">.</span><span class="w">  </span><span class="n">Note</span><span class="w"> </span><span class="n">cnd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="w"></span>
+<span class="w">            </span><span class="n">let</span><span class="w"> </span><span class="n">T</span><span class="o">[</span><span class="n">pos</span><span class="o">]</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="err">←</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+</code></pre></div>
+
+
+<h2>创建表的算法的效率</h2>
+<p>创建表的算法的复杂度是<span class="math">\(O(n)\)</span>，其中<span class="math">\(n\)</span>是<code>W</code>的长度。除去一些初始化的工作，所有工作都是在<code>while</code>循环中完成的，足够说明这个循环执行用了<span class="math">\(O(n)\)</span>的时间，同时还会检查<code>pos</code>和<code>pos - cnd</code>的大小。在第一个分支里，<code>pos - cnd</code>被保留，而<code>pos</code>与<code>cnd</code>同时递增，自然，<code>pos</code>增加了。在第二个分支里，<code>cnd</code>被<code>T[cnd]</code>所替代，即以上总是严格低于<code>cnd</code>，从而增加了<code>pos - cnd</code>。在第三个分支里，<code>pos</code>增加了，而<code>cnd</code>没有，所以<code>pos</code>和<code>pos - cnd</code>都增加了。因为<code>pos</code> <span class="math">\(\geq\)</span> <code>pos - cnd</code>，即在每一个阶段要么<code>pos</code>增加，要么<code>pos</code>的一个下界增加；所以既然此算法只要有<code>pos</code> = <span class="math">\(n\)</span>就终止了，这个循环必然最多在<span class="math">\(2n\)</span>次迭代后终止，因为<code>pos - cnd</code>从1开始。因此创建表的算法的复杂度是<span class="math">\(O(n)\)</span>。 </p>
+<p>另见：</p>
+<ul>
+<li>Boyer-Moore字符串搜索算法</li>
+<li>An explanation of the algorithm and sample C++ code by David Eppstein</li>
+<li>Knuth-Morris-Pratt algorithm description and C code by Christian Charras and Thierry Lecroq</li>
+<li>Interactive animation for Knuth-Morris-Pratt algorithm by Mike Goodrich</li>
+<li>Explanation of the algorithm from scratch by FH Flensburg.</li>
+</ul>
+<p>引用：</p>
+<ul>
+<li>高德纳; James H. Morris, Jr, Vaughan Pratt. Fast pattern matching in strings. SIAM Journal on Computing. 1977, 6 (2): 323–350. </li>
+<li>Thomas H. Cormen; Charles E. Leiserson, Ronald L. Rivest, Clifford Stein. Section 32.4: The Knuth-Morris-Pratt algorithm. Introduction to Algorithms Second edition. MIT Press and McGraw-Hill. 2001: 923–931. ISBN 978-0-262-03293-3. </li>
+</ul>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' }, Macros: {} }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/kmp.html">kmp</a>
+      <a href="/tag/string.html">string</a>
+      <a href="/tag/search.html">search</a>
+      <a href="/tag/match.html">match</a>
+      <a href="/tag/substring.html">substring</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>
+  &copy; 2021  - This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>
+</p>
+<p>
+Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+</p><p>
+  <a rel="license"
+     href="http://creativecommons.org/licenses/by-sa/4.0/"
+     target="_blank">
+    <img alt="Creative Commons License"
+         title="Creative Commons License"
+         style="border-width:0"
+           src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+         width="80"
+         height="15"/>
+  </a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Suibin Sun's Blog ",
+  "url" : "",
+  "image": "/images/profile.png",
+  "description": "Suibin's Thoughts and Writings"
+}
+</script>
+
+
+</body>
+</html>
